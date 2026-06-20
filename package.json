@@ -1,0 +1,53 @@
+{
+  "name": "doctor-saas",
+  "version": "1.0.0",
+  "description": "doctor-saas",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "db:migrate": "node scripts/db-migrate.js",
+    "db:push": "node scripts/db-push.js",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "test": "node scripts/run-all-tests.js",
+    "test:smoke": "node --test tests/api.smoke.test.js",
+    "test:api": "node scripts/run-api-tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lakshmikanth26/doctor-saas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lakshmikanth26/doctor-saas/issues"
+  },
+  "homepage": "https://github.com/lakshmikanth26/doctor-saas#readme",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@supabase/server": "^1.1.0",
+    "@supabase/supabase-js": "^2.108.2",
+    "bcryptjs": "^3.0.3",
+    "bullmq": "^5.79.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "ioredis": "^5.11.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.22.0",
+    "prisma": "^7.8.0",
+    "resend": "^6.14.0",
+    "uuid": "^14.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
+}

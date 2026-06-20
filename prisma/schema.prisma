@@ -1,0 +1,1020 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ClinicType {
+  HUMAN_GENERAL
+  HUMAN_SPECIALTY
+  HUMAN_MENTAL_HEALTH
+  VETERINARY_SMALL
+  VETERINARY_LARGE
+  VETERINARY_MIXED
+  PHYSIOTHERAPY
+}
+
+enum PlanTier {
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  GRACE_PERIOD
+  RESTRICTED
+  CANCELLED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum SystemRole {
+  SYSTEM_ADMIN
+  SALES_REP
+  SALES_MANAGER
+}
+
+enum OrgRole {
+  ORG_OWNER
+  ORG_ADMIN
+  BRANCH_MANAGER
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+  BILLING_STAFF
+  PHARMACIST
+  LAB_TECHNICIAN
+  PATIENT
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  IN_PERSON
+  TELEHEALTH
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  BANK_TRANSFER
+  ONLINE
+}
+
+enum CRMLeadStatus {
+  NEW
+  CONTACTED
+  DEMO_SCHEDULED
+  DEMO_DONE
+  PROPOSAL_SENT
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum CRMActivityType {
+  CALL
+  EMAIL
+  MEETING
+  DEMO
+  PROPOSAL
+  NOTE
+}
+
+enum NotificationChannel {
+  EMAIL
+  WHATSAPP
+  SMS
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+model Organization {
+  id         String     @id @default(uuid())
+  slug       String     @unique
+  name       String
+  clinicType ClinicType @default(HUMAN_GENERAL)
+  plan       PlanTier   @default(STARTER)
+  logoUrl    String?
+  phone      String?
+  email      String?
+  website    String?
+  address    String?
+  city       String?
+  country    String     @default("IN")
+  timezone   String     @default("Asia/Kolkata")
+  currency   String     @default("INR")
+  locale     String     @default("en")
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  subscription   Subscription?
+  branches       Branch[]
+  users          User[]
+  patients       Patient[]
+  serviceTypes   ServiceType[]
+  drugs          Drug[]
+  feeSchedules   FeeSchedule[]
+  clinicWebsite  ClinicWebsite?
+  aiReceptionist AIReceptionist?
+  campaigns      Campaign[]
+  notifications  NotificationLog[]
+
+  @@map("organizations")
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  orgId     String
+  name      String
+  address   String?
+  city      String?
+  phone     String?
+  email     String?
+  timezone  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org          Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userBranches UserBranch[]
+  appointments Appointment[]
+  inventory    InventoryItem[]
+  invoices     Invoice[]
+
+  @@map("branches")
+}
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  orgId              String             @unique
+  plan               PlanTier
+  status             SubscriptionStatus @default(TRIALING)
+  seats              Int                @default(2)
+  trialEnds          DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  stripeSubId        String?
+  cancelledAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  orgId        String?
+  email        String     @unique
+  phone        String?
+  passwordHash String
+  firstName    String
+  lastName     String
+  gender       Gender?
+  dateOfBirth  DateTime?
+  photoUrl     String?
+  systemRole   SystemRole?
+  status       UserStatus @default(INVITED)
+  mfaEnabled   Boolean    @default(false)
+  mfaSecret    String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  org           Organization?  @relation(fields: [orgId], references: [id])
+  userBranches  UserBranch[]
+  staffProfile  StaffProfile?
+  refreshTokens RefreshToken[]
+  appointments  Appointment[]  @relation("ProviderAppointments")
+  visits        Visit[]        @relation("ProviderVisits")
+  prescriptions Prescription[]
+  auditLogs     AuditLog[]
+  crmLeads      CRMLead[]      @relation("AssignedLeads")
+  crmActivities CRMActivity[]
+
+  @@map("users")
+}
+
+model UserBranch {
+  id         String    @id @default(uuid())
+  userId     String
+  branchId   String
+  role       OrgRole
+  validFrom  DateTime  @default(now())
+  validUntil DateTime?
+  createdAt  DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, branchId, role])
+  @@map("user_branches")
+}
+
+model StaffProfile {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  designation     String?
+  specialization  String?
+  licenseNumber   String?
+  licenseExpiry   DateTime?
+  qualifications  String?
+  consultationFee Decimal?  @db.Decimal(10, 2)
+  bio             String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("staff_profiles")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Patient {
+  id          String    @id @default(uuid())
+  orgId       String
+  mrn         String
+  firstName   String
+  lastName    String
+  gender      Gender?
+  dateOfBirth DateTime?
+  bloodGroup  String?
+  phone       String?
+  email       String?
+  address     String?
+  city        String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  org            Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  appointments   Appointment[]
+  visits         Visit[]
+  prescriptions  Prescription[]
+  invoices       Invoice[]
+  allergies      Allergy[]
+  medicalHistory MedicalHistory[]
+  pets           Pet[]
+
+  @@unique([orgId, mrn])
+  @@map("patients")
+}
+
+model Allergy {
+  id        String   @id @default(uuid())
+  patientId String
+  allergen  String
+  reaction  String?
+  severity  String?
+  createdAt DateTime @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("allergies")
+}
+
+model MedicalHistory {
+  id        String    @id @default(uuid())
+  patientId String
+  condition String
+  onsetDate DateTime?
+  status    String    @default("ACTIVE")
+  notes     String?
+  createdAt DateTime  @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("medical_history")
+}
+
+model Pet {
+  id          String    @id @default(uuid())
+  orgId       String
+  ownerId     String
+  name        String
+  species     String
+  breed       String?
+  gender      Gender?
+  dateOfBirth DateTime?
+  microchipId String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  owner Patient @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@map("pets")
+}
+
+model ServiceType {
+  id              String   @id @default(uuid())
+  orgId           String
+  name            String
+  durationMinutes Int      @default(15)
+  bufferMinutes   Int      @default(0)
+  fee             Decimal  @db.Decimal(10, 2) @default(0)
+  color           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  org          Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  feeSchedules FeeSchedule[]
+
+  @@map("service_types")
+}
+
+model Appointment {
+  id             String            @id @default(uuid())
+  orgId          String
+  branchId       String
+  patientId      String
+  providerId     String
+  serviceTypeId  String?
+  scheduledAt    DateTime
+  endsAt         DateTime
+  status         AppointmentStatus @default(SCHEDULED)
+  type           AppointmentType   @default(IN_PERSON)
+  chiefComplaint String?
+  notes          String?
+  tokenNumber    Int?
+  checkedInAt    DateTime?
+  completedAt    DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  branch      Branch       @relation(fields: [branchId], references: [id])
+  patient     Patient      @relation(fields: [patientId], references: [id])
+  provider    User         @relation("ProviderAppointments", fields: [providerId], references: [id])
+  serviceType ServiceType? @relation(fields: [serviceTypeId], references: [id])
+  visit       Visit?
+
+  @@map("appointments")
+}
+
+model Visit {
+  id             String   @id @default(uuid())
+  appointmentId  String   @unique
+  patientId      String
+  providerId     String
+  branchId       String
+  visitDate      DateTime @default(now())
+  chiefComplaint String?
+  visitType      String   @default("CONSULTATION")
+  status         String   @default("OPEN")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  appointment  Appointment    @relation(fields: [appointmentId], references: [id])
+  patient      Patient        @relation(fields: [patientId], references: [id])
+  provider     User           @relation("ProviderVisits", fields: [providerId], references: [id])
+  soapNote     SoapNote?
+  vitals       Vital[]
+  diagnoses    Diagnosis[]
+  prescription Prescription?
+  labOrders    LabOrder[]
+  invoice      Invoice?
+  documents    Document[]
+
+  @@map("visits")
+}
+
+model SoapNote {
+  id          String   @id @default(uuid())
+  visitId     String   @unique
+  subjective  String?
+  objective   String?
+  assessment  String?
+  plan        String?
+  aiGenerated Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@map("soap_notes")
+}
+
+model Vital {
+  id              String   @id @default(uuid())
+  visitId         String
+  weightKg        Decimal? @db.Decimal(5, 2)
+  heightCm        Decimal? @db.Decimal(5, 2)
+  bmi             Decimal? @db.Decimal(5, 2)
+  tempCelsius     Decimal? @db.Decimal(4, 1)
+  bpSystolic      Int?
+  bpDiastolic     Int?
+  pulse           Int?
+  spo2            Int?
+  respiratoryRate Int?
+  bloodSugar      Decimal? @db.Decimal(6, 2)
+  recordedAt      DateTime @default(now())
+  recordedBy      String?
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@map("vitals")
+}
+
+model Diagnosis {
+  id          String   @id @default(uuid())
+  visitId     String
+  icdCode     String?
+  description String
+  type        String   @default("PRIMARY")
+  status      String   @default("ACTIVE")
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@map("diagnoses")
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  orgId      String
+  patientId  String?
+  visitId    String?
+  type       String
+  fileName   String
+  fileUrl    String
+  fileSize   Int?
+  mimeType   String?
+  uploadedBy String?
+  createdAt  DateTime @default(now())
+
+  visit Visit? @relation(fields: [visitId], references: [id])
+
+  @@map("documents")
+}
+
+model Drug {
+  id          String   @id @default(uuid())
+  orgId       String
+  genericName String
+  brandName   String?
+  category    String?
+  form        String?
+  strength    String?
+  schedule    String   @default("OTC")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  org               Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  prescriptionItems PrescriptionItem[]
+  inventoryItems    InventoryItem[]
+
+  @@map("drugs")
+}
+
+model Prescription {
+  id          String    @id @default(uuid())
+  visitId     String    @unique
+  patientId   String
+  providerId  String
+  issuedAt    DateTime  @default(now())
+  validUntil  DateTime?
+  status      String    @default("ACTIVE")
+  notes       String?
+  dispensedAt DateTime?
+  dispensedBy String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  visit   Visit             @relation(fields: [visitId], references: [id])
+  patient Patient           @relation(fields: [patientId], references: [id])
+  provider User             @relation(fields: [providerId], references: [id])
+  items   PrescriptionItem[]
+
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             String   @id @default(uuid())
+  prescriptionId String
+  drugId         String?
+  drugName       String
+  dosage         String?
+  frequency      String?
+  durationDays   Int?
+  quantity       Int?
+  instructions   String?
+  createdAt      DateTime @default(now())
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  drug         Drug?        @relation(fields: [drugId], references: [id])
+
+  @@map("prescription_items")
+}
+
+model LabOrder {
+  id        String   @id @default(uuid())
+  visitId   String
+  patientId String
+  orderedBy String
+  orderedAt DateTime @default(now())
+  status    String   @default("PENDING")
+  priority  String   @default("ROUTINE")
+  notes     String?
+  createdAt DateTime @default(now())
+
+  visit Visit          @relation(fields: [visitId], references: [id])
+  items LabOrderItem[]
+
+  @@map("lab_orders")
+}
+
+model LabOrderItem {
+  id         String    @id @default(uuid())
+  labOrderId String
+  testName   String
+  loincCode  String?
+  status     String    @default("PENDING")
+  createdAt  DateTime  @default(now())
+
+  labOrder LabOrder   @relation(fields: [labOrderId], references: [id], onDelete: Cascade)
+  result   LabResult?
+
+  @@map("lab_order_items")
+}
+
+model LabResult {
+  id             String   @id @default(uuid())
+  labOrderItemId String   @unique
+  value          String?
+  unit           String?
+  refRangeLow    String?
+  refRangeHigh   String?
+  interpretation String?
+  isCritical     Boolean  @default(false)
+  resultAt       DateTime @default(now())
+  verifiedBy     String?
+  notes          String?
+
+  labOrderItem LabOrderItem @relation(fields: [labOrderItemId], references: [id], onDelete: Cascade)
+
+  @@map("lab_results")
+}
+
+model FeeSchedule {
+  id            String    @id @default(uuid())
+  orgId         String
+  serviceTypeId String?
+  name          String
+  price         Decimal   @db.Decimal(10, 2)
+  taxRate       Decimal   @db.Decimal(5, 2) @default(0)
+  validFrom     DateTime  @default(now())
+  validUntil    DateTime?
+  isActive      Boolean   @default(true)
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  serviceType ServiceType? @relation(fields: [serviceTypeId], references: [id])
+
+  @@map("fee_schedules")
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  orgId         String
+  branchId      String
+  patientId     String
+  visitId       String?       @unique
+  invoiceNumber String
+  status        InvoiceStatus @default(DRAFT)
+  subtotal      Decimal       @db.Decimal(10, 2) @default(0)
+  taxAmount     Decimal       @db.Decimal(10, 2) @default(0)
+  discount      Decimal       @db.Decimal(10, 2) @default(0)
+  total         Decimal       @db.Decimal(10, 2) @default(0)
+  paidAmount    Decimal       @db.Decimal(10, 2) @default(0)
+  dueDate       DateTime?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  branch   Branch        @relation(fields: [branchId], references: [id])
+  patient  Patient       @relation(fields: [patientId], references: [id])
+  visit    Visit?        @relation(fields: [visitId], references: [id])
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  description String
+  category    String   @default("SERVICE")
+  quantity    Int      @default(1)
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  taxRate     Decimal  @db.Decimal(5, 2) @default(0)
+  amount      Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  invoiceId  String
+  amount     Decimal       @db.Decimal(10, 2)
+  method     PaymentMethod @default(CASH)
+  gatewayRef String?
+  status     String        @default("SUCCESS")
+  paidAt     DateTime      @default(now())
+  notes      String?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@map("payments")
+}
+
+model InventoryItem {
+  id           String    @id @default(uuid())
+  orgId        String
+  branchId     String
+  drugId       String?
+  itemName     String
+  batchNumber  String?
+  expiryDate   DateTime?
+  quantity     Int       @default(0)
+  reorderLevel Int       @default(10)
+  unitCost     Decimal   @db.Decimal(10, 2) @default(0)
+  sellingPrice Decimal   @db.Decimal(10, 2) @default(0)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  branch       Branch                 @relation(fields: [branchId], references: [id])
+  drug         Drug?                  @relation(fields: [drugId], references: [id])
+  transactions InventoryTransaction[]
+
+  @@map("inventory_items")
+}
+
+model InventoryTransaction {
+  id              String   @id @default(uuid())
+  inventoryItemId String
+  type            String
+  quantity        Int
+  referenceId     String?
+  referenceType   String?
+  notes           String?
+  performedBy     String?
+  transactedAt    DateTime @default(now())
+
+  item InventoryItem @relation(fields: [inventoryItemId], references: [id])
+
+  @@map("inventory_transactions")
+}
+
+model LeaveRequest {
+  id         String    @id @default(uuid())
+  userId     String
+  orgId      String
+  leaveType  String
+  fromDate   DateTime
+  toDate     DateTime
+  reason     String?
+  status     String    @default("PENDING")
+  approvedBy String?
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@map("leave_requests")
+}
+
+model Attendance {
+  id        String    @id @default(uuid())
+  userId    String
+  branchId  String
+  date      DateTime  @db.Date
+  checkIn   DateTime?
+  checkOut  DateTime?
+  method    String    @default("MANUAL")
+  notes     String?
+
+  @@unique([userId, branchId, date])
+  @@map("attendance")
+}
+
+model ClinicWebsite {
+  id             String    @id @default(uuid())
+  orgId          String    @unique
+  subdomain      String    @unique
+  customDomain   String?
+  theme          String    @default("default")
+  status         String    @default("DRAFT")
+  heroTitle      String?
+  heroSubtitle   String?
+  about          String?
+  phone          String?
+  email          String?
+  address        String?
+  gaTag          String?
+  metaPixelTag   String?
+  whatsappNumber String?
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  org   Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  pages WebsitePage[]
+  blogs WebsiteBlog[]
+
+  @@map("clinic_websites")
+}
+
+model WebsitePage {
+  id              String   @id @default(uuid())
+  websiteId       String
+  slug            String
+  title           String
+  metaTitle       String?
+  metaDescription String?
+  contentJson     Json?
+  pageType        String   @default("CUSTOM")
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  website ClinicWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@unique([websiteId, slug])
+  @@map("website_pages")
+}
+
+model WebsiteBlog {
+  id          String    @id @default(uuid())
+  websiteId   String
+  title       String
+  slug        String
+  contentHtml String?
+  authorId    String?
+  tags        String[]
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  website ClinicWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@unique([websiteId, slug])
+  @@map("website_blogs")
+}
+
+model AIReceptionist {
+  id              String   @id @default(uuid())
+  orgId           String   @unique
+  personaName     String   @default("AI Assistant")
+  greetingMessage String?
+  knowledgeBase   Json?
+  whatsappEnabled Boolean  @default(false)
+  fallbackContact String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  org      Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  sessions AIChatSession[]
+
+  @@map("ai_receptionists")
+}
+
+model AIChatSession {
+  id             String    @id @default(uuid())
+  receptionistId String
+  orgId          String
+  patientPhone   String?
+  patientName    String?
+  channel        String    @default("WEB")
+  outcome        String?
+  startedAt      DateTime  @default(now())
+  endedAt        DateTime?
+
+  receptionist AIReceptionist  @relation(fields: [receptionistId], references: [id])
+  messages     AIChatMessage[]
+
+  @@map("ai_chat_sessions")
+}
+
+model AIChatMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  session AIChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("ai_chat_messages")
+}
+
+model CRMLead {
+  id           String        @id @default(uuid())
+  clinicName   String
+  clinicType   ClinicType?
+  sizeEstimate String?
+  city         String?
+  country      String?
+  source       String?
+  status       CRMLeadStatus @default(NEW)
+  assignedTo   String?
+  notes        String?
+  lostReason   String?
+  convertedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  assignee      User?            @relation("AssignedLeads", fields: [assignedTo], references: [id])
+  contacts      CRMContact[]
+  opportunities CRMOpportunity[]
+  activities    CRMActivity[]
+
+  @@map("crm_leads")
+}
+
+model CRMContact {
+  id              String   @id @default(uuid())
+  leadId          String
+  name            String
+  title           String?
+  email           String?
+  phone           String?
+  isDecisionMaker Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  lead CRMLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("crm_contacts")
+}
+
+model CRMOpportunity {
+  id          String    @id @default(uuid())
+  leadId      String
+  expectedArr Decimal?  @db.Decimal(10, 2)
+  closeDate   DateTime?
+  probability Int?
+  stage       String    @default("DISCOVERY")
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  lead      CRMLead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  proposals CRMProposal[]
+
+  @@map("crm_opportunities")
+}
+
+model CRMActivity {
+  id          String          @id @default(uuid())
+  leadId      String
+  type        CRMActivityType
+  subject     String?
+  notes       String?
+  outcome     String?
+  scheduledAt DateTime?
+  completedAt DateTime?
+  createdBy   String?
+  createdAt   DateTime        @default(now())
+
+  lead          CRMLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  createdByUser User?   @relation(fields: [createdBy], references: [id])
+
+  @@map("crm_activities")
+}
+
+model CRMProposal {
+  id            String    @id @default(uuid())
+  opportunityId String
+  fileUrl       String?
+  sentAt        DateTime?
+  viewedAt      DateTime?
+  expiresAt     DateTime?
+  status        String    @default("DRAFT")
+  createdAt     DateTime  @default(now())
+
+  opportunity CRMOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@map("crm_proposals")
+}
+
+model Campaign {
+  id              String              @id @default(uuid())
+  orgId           String
+  name            String
+  channel         NotificationChannel
+  subject         String?
+  bodyHtml        String?
+  bodyText        String?
+  audienceFilter  Json?
+  status          String              @default("DRAFT")
+  scheduledAt     DateTime?
+  sentAt          DateTime?
+  totalRecipients Int                 @default(0)
+  sentCount       Int                 @default(0)
+  deliveredCount  Int                 @default(0)
+  openedCount     Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@map("campaigns")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String?
+  branchId   String?
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model NotificationLog {
+  id        String              @id @default(uuid())
+  orgId     String?
+  userId    String?
+  channel   NotificationChannel
+  to        String
+  subject   String?
+  body      String?
+  status    NotificationStatus  @default(PENDING)
+  errorMsg  String?
+  sentAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  org Organization? @relation(fields: [orgId], references: [id])
+
+  @@map("notification_logs")
+}
