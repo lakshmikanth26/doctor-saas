@@ -1,0 +1,152 @@
+.env.example
+  85fae2d6518ebe69 1-5,11-33
+  f01efc6ba57071f8 6-10,34-39
+src/middleware/errorHandler.js
+  f01efc6ba57071f8 2,6-9,12,16
+  85fae2d6518ebe69 1,3-5,10-11,13-15,17-34
+src/modules/emr/emr.routes.js
+  85fae2d6518ebe69 1-16
+src/modules/auth/auth.routes.js
+  85fae2d6518ebe69 1-14
+tests/helpers.js
+  f01efc6ba57071f8 1-42
+src/config/env.js
+  85fae2d6518ebe69 1-25,31-40
+  f01efc6ba57071f8 26-30
+src/utils/response.js
+  85fae2d6518ebe69 1-9
+src/modules/billing/billing.controller.js
+  85fae2d6518ebe69 1-68
+src/modules/ai-receptionist/ai.service.js
+  85fae2d6518ebe69 1-220
+src/modules/ai-receptionist/ai.routes.js
+  85fae2d6518ebe69 1-36
+src/config/db.js
+  f01efc6ba57071f8 3,9-14
+  85fae2d6518ebe69 1-2,4-8,15-25
+src/routes/index.js
+  85fae2d6518ebe69 1-28
+src/modules/inventory/inventory.service.js
+  f01efc6ba57071f8 4,7,10-11,14-16,22,34-35,37,53,63-71,83-86,90
+  85fae2d6518ebe69 1-3,5-6,8-9,12-13,17-21,23-33,36,38-52,54-62,72-82,87-89,91-97
+src/modules/staff/staff.routes.js
+  f01efc6ba57071f8 17,45-52
+  85fae2d6518ebe69 1-16,18-44,53
+src/modules/website/website.service.js
+  85fae2d6518ebe69 1-7,10-14,19-20,22-31,33-40,42-50,52-67,72-87,89-90,93-96,98-116,119-120,122-123
+  f01efc6ba57071f8 8-9,15-18,21,32,41,51,68-71,88,91-92,97,117-118,121
+src/modules/website/website.routes.js
+  85fae2d6518ebe69 1-58
+src/config/redis.js
+  85fae2d6518ebe69 1-11
+src/middleware/authenticate.js
+  85fae2d6518ebe69 1-57
+src/modules/inventory/inventory.routes.js
+  85fae2d6518ebe69 1-40
+scripts/run-api-tests.js
+  f01efc6ba57071f8 1-6
+src/modules/billing/billing.service.js
+  85fae2d6518ebe69 1-137
+scripts/test-env.js
+  f01efc6ba57071f8 1-16
+prisma/schema.prisma
+  85fae2d6518ebe69 2,6
+src/modules/patients/patients.service.js
+  85fae2d6518ebe69 1-78
+src/modules/notifications/notification.worker.js
+  85fae2d6518ebe69 1-85
+src/modules/queue/queues.js
+  85fae2d6518ebe69 1-8
+src/modules/appointments/appointments.routes.js
+  85fae2d6518ebe69 1-15
+src/modules/emr/emr.service.js
+  85fae2d6518ebe69 1-85
+src/middleware/tenantContext.js
+  85fae2d6518ebe69 1-19
+src/server.js
+  f01efc6ba57071f8 13-15
+  85fae2d6518ebe69 1-12,16-41
+scripts/run-all-tests.js
+  f01efc6ba57071f8 1-10
+src/modules/patients/patients.routes.js
+  85fae2d6518ebe69 1-15
+src/modules/emr/emr.controller.js
+  85fae2d6518ebe69 1-74
+tests/api.integration.test.js
+  f01efc6ba57071f8 1-616
+src/modules/crm/crm.service.js
+  85fae2d6518ebe69 1-66
+src/modules/billing/billing.routes.js
+  85fae2d6518ebe69 1-15
+src/app.js
+  85fae2d6518ebe69 1-39
+src/config/supabase.js
+  f01efc6ba57071f8 1-18
+prisma.config.ts
+  f01efc6ba57071f8 13
+src/utils/errors.js
+  85fae2d6518ebe69 1-7
+src/utils/jwt.js
+  85fae2d6518ebe69 1-14
+src/modules/patients/patients.controller.js
+  85fae2d6518ebe69 1-57
+src/modules/staff/staff.service.js
+  f01efc6ba57071f8 7-8,22-23,25,41,52-56,61-65,70-77,109-113,118-122,126,129,143,145-158
+  85fae2d6518ebe69 1-6,9-21,24,26-40,42-51,57-60,66-69,78-108,114-117,123-125,127-128,130-142,144,159-160
+tests/api.smoke.test.js
+  f01efc6ba57071f8 1-85
+scripts/db-push.js
+  f01efc6ba57071f8 1-14
+scripts/db-migrate.js
+  f01efc6ba57071f8 1-14
+src/modules/prescriptions/prescriptions.routes.js
+  85fae2d6518ebe69 1-32
+src/modules/auth/auth.service.js
+  f01efc6ba57071f8 4,95
+  85fae2d6518ebe69 1-3,5-94,96-122
+src/modules/appointments/appointments.service.js
+  85fae2d6518ebe69 1-161
+src/modules/appointments/appointments.controller.js
+  85fae2d6518ebe69 1-58
+src/modules/crm/crm.routes.js
+  85fae2d6518ebe69 1-37
+package.json
+  f01efc6ba57071f8 10-11,13-16
+  85fae2d6518ebe69 6,8-9,12
+src/modules/prescriptions/prescriptions.service.js
+  85fae2d6518ebe69 1-4,8-13,15-20,23-32,34-40,46-59,63-65
+  f01efc6ba57071f8 5-7,14,21-22,33,41-45,60-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "3a93c59b109aadc19de1d1311ba59f7bb5e2b4b8",
+  "prompts": {
+    "85fae2d6518ebe69": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c7da7977-7859-4fb5-8e6f-d2691630c4d0",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 2355,
+      "total_deletions": 11,
+      "accepted_lines": 2207,
+      "overriden_lines": 0
+    },
+    "f01efc6ba57071f8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "82f42ae8-ae07-493f-b2cf-554b9dc6e157",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 1037,
+      "total_deletions": 145,
+      "accepted_lines": 985,
+      "overriden_lines": 0
+    }
+  }
+}
