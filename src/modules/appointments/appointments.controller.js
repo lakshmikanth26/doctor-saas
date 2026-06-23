@@ -124,7 +124,6 @@ export const publicBook = async (req, res, next) => {
     });
     if (!org || !org.isActive) return sendError(res, 'Clinic not found', 404);
 
-    // Find or create patient by phone (normalized) or email
     const { patients } = await lookupByContact(org.id, { phone: body.phone, email: body.email }).catch(() => ({ patients: [] }));
     let patient = patients[0];
     if (!patient) {
@@ -140,14 +139,12 @@ export const publicBook = async (req, res, next) => {
       });
     }
 
-    // Resolve scheduledAt from date + optional time
     const dateStr = body.scheduledDate;
     const timeStr = body.scheduledTime || '09:00';
     const scheduledAt = new Date(`${dateStr}T${timeStr}:00`);
 
     const providerId = await resolvePublicProviderId(org.id, body.doctorId);
 
-    // Get first branch
     const branch = await prisma.branch.findFirst({ where: { orgId: org.id } });
     if (!branch) return sendError(res, 'Clinic has no branch configured', 400);
 
@@ -161,7 +158,7 @@ export const publicBook = async (req, res, next) => {
       },
     });
 
-    const endsAt = new Date(scheduledAt.getTime() + 60 * 60 * 1000); // 1 hour
+    const endsAt = new Date(scheduledAt.getTime() + 60 * 60 * 1000);
 
     const appointment = await prisma.appointment.create({
       data: {
@@ -184,6 +181,36 @@ export const publicBook = async (req, res, next) => {
 
     return sendSuccess(res, appointment, 'Appointment booked', 201);
   } catch (err) { next(err); }
+};
+
+export const publicGetSlots = async (req, res, next) => {
+  try {
+    const { orgSlug, date, doctorId, providerId } = req.query;
+    if (!orgSlug) return sendError(res, 'orgSlug required', 400);
+    if (!date) return sendError(res, 'date required', 400);
+
+    const org = await prisma.organization.findFirst({
+      where: { slug: orgSlug },
+      select: { id: true, isActive: true },
+    });
+    if (!org || !org.isActive) return sendError(res, 'Clinic not found', 404);
+
+    const resolvedDoctorId = coerceOptionalUuid(doctorId) ?? coerceOptionalUuid(providerId);
+    const resolvedProviderId = await resolvePublicProviderId(org.id, resolvedDoctorId);
+
+    const branch = await prisma.branch.findFirst({ where: { orgId: org.id } });
+    if (!branch) return sendSuccess(res, []);
+
+    const slots = await service.getAvailableSlots(org.id, {
+      providerId: resolvedProviderId,
+      branchId: branch.id,
+      date,
+    });
+    return sendSuccess(res, slots);
+  } catch (err) {
+    if (err.status === 404 || err.status === 400) return sendError(res, err.message, err.status);
+    next(err);
+  }
 };
 
 export const publicQueue = async (req, res, next) => {

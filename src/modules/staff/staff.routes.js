@@ -2,9 +2,29 @@ import { Router } from 'express';
 import { authenticate } from '../../middleware/authenticate.js';
 import { tenantContext } from '../../middleware/tenantContext.js';
 import { sendSuccess } from '../../utils/response.js';
+import { prisma } from '../../config/db.js';
 import * as service from './staff.service.js';
 
 const router = Router();
+
+router.get('/public', async (req, res, next) => {
+  try {
+    const { orgSlug, limit } = req.query;
+    if (!orgSlug) return res.status(400).json({ success: false, message: 'orgSlug required' });
+    const org = await prisma.organization.findUnique({
+      where: { slug: orgSlug },
+      select: { id: true, isActive: true },
+    });
+    if (!org || !org.isActive) return sendSuccess(res, { staff: [], total: 0, page: 1, limit: 50, pages: 0 });
+    const result = await service.listStaff(org.id, { role: 'DOCTOR', limit: +limit || 50 });
+    const staff = result.staff.map((member) => ({
+      ...member,
+      role: member.userBranches?.find((ub) => ub.role === 'DOCTOR')?.role || member.systemRole,
+    }));
+    return sendSuccess(res, { ...result, staff });
+  } catch (e) { next(e); }
+});
+
 router.use(authenticate, tenantContext);
 
 router.get('/', async (req, res, next) => {
