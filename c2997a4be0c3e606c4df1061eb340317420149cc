@@ -1,0 +1,51 @@
+src/app.js
+  1676d769c1495538 13-26,32-40
+prisma/schema.prisma
+  f01efc6ba57071f8 2-3
+api/index.js
+  1676d769c1495538 4,6,8
+  f01efc6ba57071f8 5,7
+vercel.json
+  1676d769c1495538 5-10
+src/modules/appointments/appointments.controller.js
+  f01efc6ba57071f8 189-220
+src/config/db.js
+  f01efc6ba57071f8 25-26,40-41
+src/modules/appointments/appointments.routes.js
+  f01efc6ba57071f8 2,10
+src/modules/queue/queues.js
+  f01efc6ba57071f8 4-7,9-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "c2997a4be0c3e606c4df1061eb340317420149cc",
+  "prompts": {
+    "1676d769c1495538": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "37643a25-050a-4a44-91f9-294760856c0d",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 58,
+      "total_deletions": 17,
+      "accepted_lines": 33,
+      "overriden_lines": 0
+    },
+    "f01efc6ba57071f8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "82f42ae8-ae07-493f-b2cf-554b9dc6e157",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 67,
+      "total_deletions": 60,
+      "accepted_lines": 66,
+      "overriden_lines": 0
+    }
+  }
+}
