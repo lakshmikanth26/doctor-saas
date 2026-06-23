@@ -22,6 +22,8 @@ function createPgPool(connectionString) {
 
   return new pg.Pool({
     connectionString: cleanUrl,
+    max: process.env.VERCEL ? 1 : 10,
+    idleTimeoutMillis: process.env.VERCEL ? 5000 : 30000,
     ...(isSupabase && { ssl: { rejectUnauthorized: false } }),
   });
 }
@@ -35,8 +37,5 @@ function createPrismaClient() {
   });
 }
 
-export const prisma = globalForPrisma.prisma || createPrismaClient();
-
-if (env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+globalForPrisma.prisma = prisma;

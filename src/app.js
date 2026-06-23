@@ -10,19 +10,34 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: [env.FRONTEND_URL, /\.mednest\.app$/],
+  origin(origin, callback) {
+    if (!origin) return callback(null, true)
+    const allowed = [
+      env.FRONTEND_URL,
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      /^https:\/\/.*\.vercel\.app$/,
+      /^https:\/\/.*\.mednest\.app$/,
+    ]
+    if (allowed.some((o) => (o instanceof RegExp ? o.test(origin) : o === origin))) {
+      return callback(null, true)
+    }
+    return callback(null, false)
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, message: 'Too many requests, please try again later' },
-}));
+if (!process.env.VERCEL) {
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many requests, please try again later' },
+  }));
+}
 
 app.get('/', (req, res) => {
   res.json({

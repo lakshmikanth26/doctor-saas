@@ -186,6 +186,38 @@ export const publicBook = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+export const publicQueue = async (req, res, next) => {
+  try {
+    const { orgSlug } = req.query;
+    const org = await prisma.organization.findFirst({
+      where: orgSlug ? { slug: orgSlug } : undefined,
+      select: { id: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (!org) return sendSuccess(res, []);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const queue = await prisma.appointment.findMany({
+      where: {
+        orgId: org.id,
+        scheduledAt: { gte: today, lte: todayEnd },
+        status: { in: ['SCHEDULED', 'CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS'] },
+      },
+      orderBy: [{ tokenNumber: 'asc' }],
+      include: {
+        patient: { select: { id: true, firstName: true, lastName: true, phone: true } },
+        provider: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+
+    return sendSuccess(res, queue);
+  } catch (err) { next(err); }
+};
+
 export const liveQueue = async (req, res, next) => {
   try {
     const { branchId } = req.query;
