@@ -1,0 +1,31 @@
+vercel.json
+  f01efc6ba57071f8 1-7
+api/index.js
+  f01efc6ba57071f8 1-6
+src/modules/appointments/appointments.service.js
+  f01efc6ba57071f8 2,98-102
+package.json
+  f01efc6ba57071f8 16-17
+src/app.js
+  f01efc6ba57071f8 27-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "a3269848e4656c1e286ed528760d339e5ce9f6fa",
+  "prompts": {
+    "f01efc6ba57071f8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "82f42ae8-ae07-493f-b2cf-554b9dc6e157",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 31,
+      "total_deletions": 2,
+      "accepted_lines": 31,
+      "overriden_lines": 0
+    }
+  }
+}
