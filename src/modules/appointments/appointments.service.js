@@ -1,4 +1,5 @@
 import { prisma } from '../../config/db.js';
+import { env } from '../../config/env.js';
 import { notificationQueue } from '../queue/queues.js';
 import { resolvePatientId } from '../patients/patients.service.js';
 
@@ -94,7 +95,11 @@ export const createAppointment = async (orgId, data) => {
     patientName: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
     doctorName: `Dr. ${appointment.provider.firstName} ${appointment.provider.lastName}`,
     scheduledAt: appointment.scheduledAt,
-  }, { delay: 0 });
+  }, { delay: 0 }).catch((err) => {
+    if (env.NODE_ENV !== 'test') {
+      console.warn('[NotificationQueue] enqueue failed:', err.message);
+    }
+  });
 
   return appointment;
 };

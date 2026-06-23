@@ -24,6 +24,16 @@ app.use(rateLimit({
   message: { success: false, message: 'Too many requests, please try again later' },
 }));
 
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    app: env.APP_NAME,
+    message: 'Mednest API — use /health or /api/v1/*',
+    health: '/health',
+    api: '/api/v1',
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', app: env.APP_NAME, env: env.NODE_ENV, ts: new Date().toISOString() });
 });
