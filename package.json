@@ -9,12 +9,13 @@
     "start": "node src/server.js",
     "db:migrate": "node scripts/db-migrate.js",
     "db:push": "node scripts/db-push.js",
-    "db:generate": "prisma generate",
+    "db:generate": "npx prisma generate",
     "db:studio": "prisma studio",
     "test": "node scripts/run-all-tests.js",
     "test:smoke": "node --test tests/api.smoke.test.js",
     "test:api": "node scripts/run-api-tests.js",
-    "postinstall": "prisma generate"
+    "postinstall": "npm run db:generate",
+    "vercel-build": "npm run db:generate"
   },
   "repository": {
     "type": "git",
