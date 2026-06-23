@@ -2,6 +2,10 @@ import { prisma } from '../../config/db.js';
 
 const MRN_PREFIX = 'PT';
 
+function normalizePhone(phone) {
+  return phone.replace(/\D/g, '');
+}
+
 async function generateMRN(orgId) {
   const count = await prisma.patient.count({ where: { orgId } });
   return `${MRN_PREFIX}${String(count + 1).padStart(6, '0')}`;
@@ -24,6 +28,7 @@ export const listPatients = async (orgId, { search, page = 1, limit = 20 }) => {
         { firstName: { contains: search, mode: 'insensitive' } },
         { lastName: { contains: search, mode: 'insensitive' } },
         { phone: { contains: search } },
+        { email: { contains: search, mode: 'insensitive' } },
         { mrn: { contains: search, mode: 'insensitive' } },
       ],
     }),
@@ -35,6 +40,63 @@ export const listPatients = async (orgId, { search, page = 1, limit = 20 }) => {
   ]);
 
   return { patients, total, page, limit, totalPages: Math.ceil(total / limit) };
+};
+
+/** Find patients by mobile or email (for appointment booking). */
+export const lookupByContact = async (orgId, { phone, email }) => {
+  if (!phone && !email) {
+    throw Object.assign(new Error('Phone or email is required'), { status: 400 });
+  }
+
+  const conditions = [];
+  if (phone) {
+    const digits = normalizePhone(phone);
+    if (digits.length >= 6) {
+      conditions.push({ phone: { contains: digits } });
+    }
+  }
+  if (email) {
+    conditions.push({ email: { equals: email.trim(), mode: 'insensitive' } });
+  }
+
+  if (conditions.length === 0) {
+    throw Object.assign(new Error('Invalid phone or email'), { status: 400 });
+  }
+
+  const patients = await prisma.patient.findMany({
+    where: { orgId, isActive: true, OR: conditions },
+    select: {
+      id: true, mrn: true, firstName: true, lastName: true,
+      phone: true, email: true, gender: true,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+  });
+
+  return { patients, count: patients.length };
+};
+
+/** Resolve patient id from uuid, phone, or email (used when booking). */
+export const resolvePatientId = async (orgId, { patientId, patientPhone, patientEmail }) => {
+  if (patientId) {
+    const patient = await prisma.patient.findFirst({
+      where: { id: patientId, orgId, isActive: true },
+    });
+    if (!patient) throw Object.assign(new Error('Patient not found'), { status: 404 });
+    return patient.id;
+  }
+
+  const { patients } = await lookupByContact(orgId, { phone: patientPhone, email: patientEmail });
+  if (patients.length === 0) {
+    throw Object.assign(new Error('No patient found with this phone or email'), { status: 404 });
+  }
+  if (patients.length > 1) {
+    throw Object.assign(
+      new Error('Multiple patients match this phone/email — use patientId or refine the search'),
+      { status: 409 },
+    );
+  }
+  return patients[0].id;
 };
 
 export const getPatient = async (orgId, patientId) => {

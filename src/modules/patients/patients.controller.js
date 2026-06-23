@@ -8,7 +8,10 @@ const patientSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
-  dateOfBirth: z.string().optional(),
+  dateOfBirth: z.preprocess(
+    v => (v && typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.trim()) ? `${v.trim()}T00:00:00.000Z` : v),
+    z.string().datetime().optional()
+  ),
   bloodGroup: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
@@ -30,6 +33,14 @@ export const list = async (req, res, next) => {
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
+    return sendSuccess(res, result);
+  } catch (err) { next(err); }
+};
+
+export const lookup = async (req, res, next) => {
+  try {
+    const { phone, email } = req.query;
+    const result = await service.lookupByContact(req.org.id, { phone, email });
     return sendSuccess(res, result);
   } catch (err) { next(err); }
 };

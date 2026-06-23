@@ -10,10 +10,14 @@ import inventoryRoutes from '../modules/inventory/inventory.routes.js';
 import prescriptionRoutes from '../modules/prescriptions/prescriptions.routes.js';
 import staffRoutes from '../modules/staff/staff.routes.js';
 import websiteRoutes from '../modules/website/website.routes.js';
+import paymentRoutes from '../modules/payments/payments.routes.js';
+import feeRoutes from '../modules/fees/fees.routes.js';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/payments', paymentRoutes);
+router.use('/fees', feeRoutes);
 router.use('/patients', patientRoutes);
 router.use('/appointments', appointmentRoutes);
 router.use('/emr', emrRoutes);

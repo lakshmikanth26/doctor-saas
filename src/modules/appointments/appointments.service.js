@@ -1,5 +1,6 @@
 import { prisma } from '../../config/db.js';
 import { notificationQueue } from '../queue/queues.js';
+import { resolvePatientId } from '../patients/patients.service.js';
 
 export const getAvailableSlots = async (orgId, { providerId, branchId, date, serviceTypeId }) => {
   const dayStart = new Date(date);
@@ -42,7 +43,12 @@ export const getAvailableSlots = async (orgId, { providerId, branchId, date, ser
 };
 
 export const createAppointment = async (orgId, data) => {
-  const { branchId, patientId, providerId, serviceTypeId, scheduledAt, type, chiefComplaint, notes } = data;
+  const {
+    branchId, providerId, serviceTypeId, scheduledAt, type, chiefComplaint, notes,
+    patientId, patientPhone, patientEmail,
+  } = data;
+
+  const resolvedPatientId = await resolvePatientId(orgId, { patientId, patientPhone, patientEmail });
 
   const serviceType = serviceTypeId
     ? await prisma.serviceType.findFirst({ where: { id: serviceTypeId, orgId } })
@@ -64,7 +70,7 @@ export const createAppointment = async (orgId, data) => {
     data: {
       orgId,
       branchId,
-      patientId,
+      patientId: resolvedPatientId,
       providerId,
       serviceTypeId,
       scheduledAt: new Date(scheduledAt),

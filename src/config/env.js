@@ -2,10 +2,11 @@ import 'dotenv/config';
 
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT || '3000', 10),
-  APP_NAME: process.env.APP_NAME || 'ClinicOS',
+  PORT: parseInt(process.env.PORT || '3004', 10),
+  APP_NAME: process.env.APP_NAME || 'Mednest',
 
   DATABASE_URL: process.env.DATABASE_URL,
+  DIRECT_URL: process.env.DIRECT_URL,
 
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
@@ -15,7 +16,7 @@ export const env = {
   REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
 
   RESEND_API_KEY: process.env.RESEND_API_KEY,
-  EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@clinicos.app',
+  EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@mednest.app',
 
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
 

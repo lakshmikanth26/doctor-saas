@@ -170,6 +170,17 @@ describe('ClinicOS API integration', { skip: !dbTest }, () => {
     assert.equal(res.status, 200);
   });
 
+  it('GET /api/v1/patients/lookup finds patient by phone', async () => {
+    const res = await request(app)
+      .get('/api/v1/patients/lookup')
+      .query({ phone: '1234567890' })
+      .set(authHeader(accessToken));
+
+    assert.equal(res.status, 200, JSON.stringify(res.body));
+    assert.ok(res.body.data.patients.length >= 1);
+    assert.equal(res.body.data.patients[0].id, patientId);
+  });
+
   // ── Appointments ────────────────────────────────────────────────────────
 
   it('GET /api/v1/appointments/slots returns availability', async () => {
@@ -186,7 +197,7 @@ describe('ClinicOS API integration', { skip: !dbTest }, () => {
     assert.ok(Array.isArray(res.body.data));
   });
 
-  it('POST /api/v1/appointments books appointment', async () => {
+  it('POST /api/v1/appointments books appointment by phone', async () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(10, 0, 0, 0);
@@ -196,7 +207,7 @@ describe('ClinicOS API integration', { skip: !dbTest }, () => {
       .set(authHeader(accessToken))
       .send({
         branchId,
-        patientId,
+        patientPhone: '+911234567890',
         providerId: userId,
         scheduledAt: tomorrow.toISOString(),
         chiefComplaint: 'Routine checkup',
