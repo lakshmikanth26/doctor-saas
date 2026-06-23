@@ -1,0 +1,72 @@
+src/modules/payments/payments.controller.js
+  1676d769c1495538 2,15-38,45-85,88-93,95
+src/modules/patients/patients.service.js
+  f01efc6ba57071f8 5-8,31,45-101
+src/config/env.js
+  f01efc6ba57071f8 9
+src/modules/patients/patients.controller.js
+  f01efc6ba57071f8 40-47
+src/modules/payments/payments.routes.js
+  1676d769c1495538 4,8-11
+  f01efc6ba57071f8 2-3
+src/modules/fees/fees.controller.js
+  f01efc6ba57071f8 1,5-8,13-14,19,21-22,26,28,31-33,37,39,45-48,53-56
+src/config/db.js
+  f01efc6ba57071f8 8-24,27-30
+tests/api.integration.test.js
+  f01efc6ba57071f8 173-183,200,210
+scripts/seed-demo-doctors.js
+  85fae2d6518ebe69 1-87
+src/modules/fees/fees.routes.js
+  f01efc6ba57071f8 2-3
+src/modules/patients/patients.routes.js
+  f01efc6ba57071f8 2,9
+src/modules/appointments/appointments.service.js
+  f01efc6ba57071f8 3,46-51,73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "7f6578a4cbe57d2994bef2beb1d5b698b2f5b3cc",
+  "prompts": {
+    "1676d769c1495538": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "37643a25-050a-4a44-91f9-294760856c0d",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 78,
+      "total_deletions": 25,
+      "accepted_lines": 78,
+      "overriden_lines": 0
+    },
+    "85fae2d6518ebe69": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c7da7977-7859-4fb5-8e6f-d2691630c4d0",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 100,
+      "total_deletions": 13,
+      "accepted_lines": 87,
+      "overriden_lines": 0
+    },
+    "f01efc6ba57071f8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "82f42ae8-ae07-493f-b2cf-554b9dc6e157",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 210,
+      "total_deletions": 60,
+      "accepted_lines": 144,
+      "overriden_lines": 0
+    }
+  }
+}
