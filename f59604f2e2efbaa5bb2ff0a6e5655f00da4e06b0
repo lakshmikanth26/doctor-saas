@@ -1,0 +1,27 @@
+src/config/env.js
+  f01efc6ba57071f8 36,38-43
+api/index.js
+  f01efc6ba57071f8 1-2,4-6,8-21
+src/app.js
+  f01efc6ba57071f8 10-14,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "f59604f2e2efbaa5bb2ff0a6e5655f00da4e06b0",
+  "prompts": {
+    "f01efc6ba57071f8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "82f42ae8-ae07-493f-b2cf-554b9dc6e157",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 34,
+      "total_deletions": 10,
+      "accepted_lines": 33,
+      "overriden_lines": 0
+    }
+  }
+}
