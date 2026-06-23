@@ -7,6 +7,11 @@ import routes from './routes/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
+const isVercel = process.env.VERCEL === '1' || !!process.env.VERCEL_ENV;
+
+if (isVercel) {
+  app.set('trust proxy', 1);
+}
 
 app.use(helmet());
 app.use(cors({
@@ -29,7 +34,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-if (!process.env.VERCEL) {
+if (!isVercel) {
   app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,

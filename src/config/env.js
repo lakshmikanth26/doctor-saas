@@ -33,9 +33,14 @@ export const env = {
 
 const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'DATABASE_URL'];
 
-export function validateEnv() {
+export function getEnvStatus() {
   const missing = required.filter((k) => !process.env[k]);
-  if (missing.length) {
+  return { ok: missing.length === 0, missing };
+}
+
+export function validateEnv() {
+  const { ok, missing } = getEnvStatus();
+  if (!ok) {
     throw new Error(`Missing required env vars: ${missing.join(', ')}`);
   }
 }
