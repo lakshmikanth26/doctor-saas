@@ -1,0 +1,27 @@
+src/modules/appointments/appointments.routes.js
+  1676d769c1495538 2,11
+src/modules/appointments/appointments.controller.js
+  1676d769c1495538 161,186-215
+src/modules/staff/staff.routes.js
+  1676d769c1495538 5,9-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "fdde46eeb693ca584eed4db228378b424ed02353",
+  "prompts": {
+    "1676d769c1495538": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "37643a25-050a-4a44-91f9-294760856c0d",
+        "model": "composer-2.5"
+      },
+      "human_author": "Lakshmikanth <lakshmikanth.d@gdn-commerce.com>",
+      "messages": [],
+      "total_additions": 123,
+      "total_deletions": 75,
+      "accepted_lines": 123,
+      "overriden_lines": 0
+    }
+  }
+}
